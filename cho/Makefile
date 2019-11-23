@@ -1,0 +1,1 @@
+gcc -o ult ult.c -lwiringPi
