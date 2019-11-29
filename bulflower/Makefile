@@ -1,7 +1,7 @@
 KERNEL_VER := 4.19.75-v7+
 KERNEL_DIR = /lib/modules/$(KERNEL_VER)/build
 
-obj-m := dev.o 
+obj-m := flame_dev.o 
 
 PWD := $(shell pwd) 
 
