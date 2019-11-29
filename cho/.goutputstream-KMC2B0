@@ -38,8 +38,7 @@ int main(void)
 	int recv_bit;
 	while(1){
 		ioctl(fd,ULTRA_CMD_SEND,&recv_bit);
-		sleep(10);
-
+		usleep(500000);
 	}
 	
 	close(fd);

@@ -20,7 +20,7 @@ int main(void){
             s = micros();
         while(digitalRead(1)==1)
             e = micros();
-        dist = (e-s) / 58;
+        dist = (e-s) / 58;delayMicroseconds(10);
         printf("distance(cm) :%f\n",dist);
         delay(100);
     }
