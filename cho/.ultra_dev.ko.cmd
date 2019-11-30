@@ -1,0 +1,1 @@
+cmd_/home/pi/workspace/2019_sysprog_team/cho/ultra_dev.ko := ld -r  -EL -T ./scripts/module-common.lds -T ./arch/arm/kernel/module.lds  --build-id  -o /home/pi/workspace/2019_sysprog_team/cho/ultra_dev.ko /home/pi/workspace/2019_sysprog_team/cho/ultra_dev.o /home/pi/workspace/2019_sysprog_team/cho/ultra_dev.mod.o ;  true
