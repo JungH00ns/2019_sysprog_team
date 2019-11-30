@@ -67,7 +67,6 @@ int ultra_release(struct inode *inode,struct file *flip)
 
 long ultra_ioctl(struct file * filp, unsigned int cmd, unsigned long arg)
 {
-
    int tmp,tmp2,recv;
    int ttmp,ttmp2,ttmp4,ttmp6,ttmp7;
    //*gpset0 |= (1<<17);
@@ -76,7 +75,7 @@ long ultra_ioctl(struct file * filp, unsigned int cmd, unsigned long arg)
    
    switch (cmd)
    {
-        case ULTRA_CMD_SEND:
+	case ULTRA_CMD_SEND:
         copy_from_user(&recv,(const void*)arg,4);
         
         if(recv == 1)

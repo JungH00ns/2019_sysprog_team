@@ -4,6 +4,7 @@
 #include <linux/fs.h> 
 #include <linux/uaccess.h> 
 #include <linux/slab.h> 
+#include <linux/delay.h>
 
 #include <asm/mach/map.h> 
 #include <asm/io.h>
@@ -38,9 +39,15 @@ int flame_open(struct inode * inode, struct file * filp){
     gpclr0 = (volatile unsigned int *)(gpio_base + GPCLR0);
     gplev0 = (volatile unsigned int *)(gpio_base + GPLEV0);
     //printk(KERN_INFO "gpsel1 : %x \n",*gpsel1);
+<<<<<<< HEAD
+
+    *gpsel1&=(0<<30);
+     //*gpsel1 |= (1<<23); 
+=======
     
     *gpsel1 &= (0<<30);
     //*gpsel1 |= (1<<23);
+>>>>>>> ca3f61cf88d5bc44491c233e422e87d43f903469
     //printk(KERN_INFO "gpsel1 : %x \n",*gpsel1);
 
 
@@ -66,7 +73,7 @@ long flame_ioctl(struct file * filp, unsigned int cmd, unsigned long arg)
         tmp = ((*gplev0) & (0x01 << 17));
         
 	    printk(KERN_INFO "signal : %d \n",tmp/32768);
-      
+        msleep(1000); //1sec
         copy_to_user(arg,&tmp,sizeof(int));
         break;
 
