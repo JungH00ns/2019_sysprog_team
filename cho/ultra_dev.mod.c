@@ -28,7 +28,11 @@ __attribute__((section("__versions"))) = {
 	{ 0xf230cadf, "module_layout" },
 	{ 0x6bc3fbc0, "__unregister_chrdev" },
 	{ 0xe549e5f5, "__register_chrdev" },
-	{ 0xf9a482f9, "msleep" },
+	{ 0xdb7305a1, "__stack_chk_fail" },
+	{ 0x5f754e5a, "memset" },
+	{ 0xf4fa543b, "arm_copy_to_user" },
+	{ 0x28cc25db, "arm_copy_from_user" },
+	{ 0x8f678b07, "__stack_chk_guard" },
 	{ 0xedc03953, "iounmap" },
 	{ 0x2e5810c6, "__aeabi_unwind_cpp_pr1" },
 	{ 0xe97c4103, "ioremap" },
@@ -42,4 +46,4 @@ __attribute__((section(".modinfo"))) =
 "depends=";
 
 
-MODULE_INFO(srcversion, "B531F3D0276A572B484C245");
+MODULE_INFO(srcversion, "D9CF8466273A2F1EFF11FF4");
