@@ -48,10 +48,10 @@ int main(void)
 		{
 			//printf("time = %d \n",time);
 			ioctl(fd,ULTRA_CMD_RECV,&time_bit);
-			
+			//printf("%d ",time_bit);
 			if(time_bit!=0)
 			{
-				printf("time bit : %d\n",time_bit);
+				printf("time bit : %3f\n",time_bit*1.4);
 				break;
 			}
 			usleep(1);
