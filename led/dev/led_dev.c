@@ -54,6 +54,7 @@ int led_open(struct inode * inode, struct file * filp){
     *gpsel0&=(0<<31);
     *gpsel0|=(1<<18);    //B
     *gpsel0|=(1<<15);    //B
+
     *gpsel0|=(1<<12);    //B
     
 //    printk(KERN_INFO "gpsel0 : %d\n", *gpsel0);
