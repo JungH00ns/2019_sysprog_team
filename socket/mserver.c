@@ -98,15 +98,15 @@ int main() {
                     fflush(stdout);
                     //sprintf(sendBuff,"%s",readBuff);
                     //write(connectFD, sendBuff, strlen(sendBuff));
-                    if(!strncmp(readBuff,"aaa",3)){
+                    if(!strncmp(readBuff,"0",1)){
                         //sprintf(sendBuff,"%s",readBuff);
                         //write(connectFD, sendBuff, strlen(sendBuff));
-                        write(connectFD,"111",3);
+                        write(connectFD,"0",1);
                     }
-                    else if(!strncmp(readBuff,"bbb",3)){
+                    else if(!strncmp(readBuff,"1",1)){
                         //sprintf(sendBuff,"%s",readBuff);
                         //write(connectFD, sendBuff, strlen(sendBuff));
-                        write(connectFD,"222",3);
+                        write(connectFD,"1",1);
                     }
                     
                 }
