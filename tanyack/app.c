@@ -245,5 +245,5 @@ int buzzer_init(){
 
 int buzzer_check(int num){
     int situation=num;
-    ioctl(buzzer_fd,MOTOR_IOCTL_CMD_SET_DIRECTION,&situation);
+    ioctl(buzzer_fd,BUZZER_CMD_SET_DIRECTION,&situation);
 }
