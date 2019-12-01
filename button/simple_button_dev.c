@@ -37,25 +37,33 @@ int button_release(struct inode * inode, struct file * filp) {
     iounmap((void *)gpio_base); 
     return 0; 
 }
-
+/*
 ssize_t button_read(struct file * flip, char * buf, size_t count, loff_t * f_pos){
     int button_value = 0; 
      
     button_value = (*gplev0) & (0x01 << 23); 
     
     printk(KERN_ALERT "reading button value : %x \n", *gplev0); 
-
     copy_to_user(buf, &button_value, sizeof(int)); 
-    
-
     return count; 
+}*/
+
+long button_ioctl(struct file * filp,  unsigned int cmd,unsigned long arg){
+    int button_value = 0; 
+     
+    button_value = (*gplev0) & (0x01 << 23); 
+    printk(KERN_ALERT "%d\n",button_value);
+	copy_to_user(arg,&button_value,sizeof(int));
+    
+    return button_value; 
 }
+
 
 static struct file_operations button_fops = { 
     .owner = THIS_MODULE, 
     .open = button_open, 
-    .release = button_release, 
-    .read = button_read
+    .release = button_release,
+    .unlocked_ioctl = button_ioctl
 }; 
 
 int __init button_init (void) { 
