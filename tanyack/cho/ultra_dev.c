@@ -112,7 +112,7 @@ long ultra_ioctl(struct file * filp, unsigned int cmd, unsigned long arg)
         lev_27 = ((*gplev0) & (0x01 << 27));
         lev_27=lev_27/134217728;
 
-        printk(KERN_INFO "lev 17 : %d lev 27 : %d\n",lev_17,lev_27);
+        //printk(KERN_INFO "lev 17 : %d lev 27 : %d\n",lev_17,lev_27);
         //printk(KERN_INFO "%d %d/",ttmp2,dist);
         if(lev_27==1){
            dist++;
