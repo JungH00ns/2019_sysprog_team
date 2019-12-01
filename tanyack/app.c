@@ -75,7 +75,7 @@ int vib_init();
 int vib_check();
 int motor_init();
 int buzzer_init();
-int buzzer_init(int num);
+int buzzer_check(int num);
 
 int main(int argc, char** argv)
 {
