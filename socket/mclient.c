@@ -45,6 +45,8 @@ int main(int argc, char** argv)
  
         while (1) 
         {
+            //ioctl
+            
             printf("Please input\n");
             fgets(sendBuffer,BUFF_SIZE,stdin);
  
