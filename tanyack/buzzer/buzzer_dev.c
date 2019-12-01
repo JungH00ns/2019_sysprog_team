@@ -56,17 +56,37 @@ long buzzer_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
       case IOCTL_CMD_SET_DIRECTION:
          printk(KERN_ALERT "buzzer set direction out!!\n");
          if(situation==0){
-            for(a=0;a<5;a++){
-               for(i=0;i<1000;i++){
+            for(a=0;a<5;a++){    //num
+               for(i=0;i<1000;i++){    //length
                   *gpset0 |= (0x01 << 25); 
-                  udelay(100);
+                  udelay(100);         //if it is big low tone
+                  *gpclr0 |= (0x01 << 25); 
+                  udelay(500);         //if it is big high tone
+               }
+               mdelay(10);       //change   
+            }
+         }else if(situation==1){
+            for(a=0;a<5;a++){
+               for(i=0;i<200;i++){
+                  *gpset0 |= (0x01 << 25); 
+                  udelay(1000);
                   *gpclr0 |= (0x01 << 25); 
                   udelay(500);
                }
                mdelay(10);
             }
-         }else if(situation==1){
-            for(a=0;a<5;a++){
+         }else if(situation==2){
+            for(a=0;a<6;a++){
+               for(i=0;i<200;i++){
+                  *gpset0 |= (0x01 << 25); 
+                  udelay(1000);
+                  *gpclr0 |= (0x01 << 25); 
+                  udelay(500);
+               }
+               mdelay(10);
+            }
+         }else if(situation==3){
+            for(a=0;a<7;a++){
                for(i=0;i<200;i++){
                   *gpset0 |= (0x01 << 25); 
                   udelay(1000);
