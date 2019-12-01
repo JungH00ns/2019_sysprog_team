@@ -47,6 +47,7 @@ ssize_t button_read(struct file * flip, char * buf, size_t count, loff_t * f_pos
     copy_to_user(buf, &button_value, sizeof(int)); 
     return count; 
 }*/
+
 long button_ioctl(struct file * filp,  unsigned int cmd,unsigned long arg){
     int button_value = 0; 
      
