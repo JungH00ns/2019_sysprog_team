@@ -25,7 +25,16 @@
 #define ULTRA_CMD_RECV     _IOW(ULTRA_MAGIC_NUMBER, 1,int)
 #define ULTRA_DEV_PATH_NAME "/dev/ultra_dev"
 
-//ultra define section
+//flame define section
+#define FLAME_MAJOR_NUMBER 502
+#define FLAME_MINOR_NUMBER 100
+#define FLAME_MAGIC_NUMBER  'f'
+#define FLAME_CMD_SEND     _IOW(FLAME_MAGIC_NUMBER, 0,int)
+#define FLAME_CMD_RECV    _IOR(FLAME_MAGIC_NUMBER, 1,int)
+
+#define FLAME_DEV_PATH_NAME "/dev/flame_dev"
+
+//motor define section
 #define MOTOR_MAJOR_NUMBER 504
 #define MOTOR_MINOR_NUMBER 100
 #define MOTOR_MAGIC_NUMBER 's'
@@ -33,20 +42,42 @@
 #define MOTOR_IOCTL_CMD_SET_DIRECTION _IOWR(MOTOR_MAGIC_NUMBER, 0, int)
 #define MOTOR_IOCTL_CMD_CLEAR_DIRECTION _IOWR(MOTOR_MAGIC_NUMBER,1,int)
 
+//buzzer define section
+#define BUZZER_MAJOR_NUMBER 505
+#define BUZZER_MINOR_NUMBER 100
+#define BUZZER_DEV_PATH_NAME "/dev/buzzer_dev"
+
+#define BUZZER_MAGIC_NUMBER 'b'
+#define BUZZER_CMD_SET_DIRECTION _IOWR(BUZZER_MAGIC_NUMBER, 0, int)
+#define BUZZER_CMD_CLEAR_DIRECTION _IOWR(BUZZER_MAGIC_NUMBER,1,int)
+
 //ultra variable
 dev_t ultra_dev;
 int ultra_fd;
 
+//flame variable
+dev_t flame_dev;
+int flame_fd;
+
 //motor variable
 dev_t motor_dev;
 int motor_fd;
+
+//buzzer variable
+dev_t buzzer_dev;
+int buzzer_fd;
 
 //socket variable
 struct sockaddr_in connectSocket;
 
 int ultra_init();
 int ultra_check();
+int flame_init();
+int flame_check();
 int motor_init();
+int buzzer_init();
+int buzzer_check(int num);
+
 int main(int argc, char** argv)
 {
     if (argc != 2) 
@@ -73,37 +104,60 @@ int main(int argc, char** argv)
         //initialize device drivers
         ultra_init();
         motor_init();
+        flame_init();
+        buzzer_init();
         
         //socket variables...
         int readBytes, writtenBytes;
         char sendBuffer[BUFFER_SIZE];
         char receiveBuffer[BUFFER_SIZE];
- 
+        int flag=0;
         while (1) 
         {
+            int send_flag=0;
             int ultra_status=ultra_check();
-            sprintf(sendBuffer,"%d\n", ultra_status);
+            int flame_status=flame_check();
+            printf("    %d\n",flame_status);
+            if(flame_status==3)
+                send_flag=3;
+            else if(ultra_status==4)
+                send_flag=4;
+                
+            sprintf(sendBuffer,"%d\n", send_flag);
             write(connectFD, sendBuffer, strlen(sendBuffer));
             
             readBytes = read(connectFD, receiveBuffer, BUFF_SIZE);
            
             int recv_value=atoi(receiveBuffer);
-            //printf("send : %d recv : %d \n",ultra_status,recv_value);
+            printf("send : %d recv : %d \n",ultra_status,recv_value);
             
-            if(recv_value!=0&&ultra_status!=0){
-                int temp_value;
-                ioctl(motor_fd,MOTOR_IOCTL_CMD_SET_DIRECTION,&temp_value);
-                usleep(500000);
-                ioctl(motor_fd,MOTOR_IOCTL_CMD_CLEAR_DIRECTION,&temp_value);
+            if(recv_value!=0){
+                flag++;
+                if(flag==1)
+                {
+                    int temp_value;
+                    ioctl(motor_fd,MOTOR_IOCTL_CMD_SET_DIRECTION,&temp_value);
+                    usleep(500000);
+                    ioctl(motor_fd,MOTOR_IOCTL_CMD_CLEAR_DIRECTION,&temp_value);
+                    flag++;
+                }
+                buzzer_check(recv_value);
+            }//recv 0 -> flag =0
+            else if(recv_value==0){
+                flag=0;
             }
-            
-            receiveBuffer[readBytes] = '\0';
-            sleep(1);
+                
+                receiveBuffer[readBytes] = '\0';
+                sleep(1);
         }
+        
     }
  
     close(connectFD);
     close(ultra_fd);
+    close(flame_fd);
+    close(motor_fd);
+    close(buzzer_fd);
     return 0;
 }  
 
@@ -144,12 +198,31 @@ int ultra_check(){
     if(time>=30.0)
         return 0;
     else
-        return 1;
+        return 4;
 }
 
+int flame_init(){
+    flame_dev=makedev(FLAME_MAJOR_NUMBER, FLAME_MINOR_NUMBER);
+	mknod(FLAME_DEV_PATH_NAME, S_IFCHR|0666, flame_dev);
+	flame_fd=open(FLAME_DEV_PATH_NAME, O_RDWR);
+	if(flame_fd < 0){
+		printf("fail to open flame\n");
+		return -1;
+	}
+    return 0;
+}
+
+int flame_check(){
+    int recv_bit;
+    ioctl(flame_fd,FLAME_CMD_RECV,&recv_bit);
+    
+    if(recv_bit==1)
+        return 0;
+    else if(recv_bit==0)
+        return 3;
+}
 
 int motor_init(){
-    
     motor_dev=makedev(MOTOR_MAJOR_NUMBER, MOTOR_MINOR_NUMBER);
 	mknod(MOTOR_DEV_PATH_NAME, S_IFCHR|0666, motor_dev);
 	
@@ -159,4 +232,22 @@ int motor_init(){
 		printf("fail to open motor\n");
 		return -1;
 	}
+}
+
+int buzzer_init(){
+    buzzer_dev=makedev(BUZZER_MAJOR_NUMBER, BUZZER_MINOR_NUMBER);
+    mknod(BUZZER_DEV_PATH_NAME, S_IFCHR|0666, buzzer_dev);
+    
+    buzzer_fd=open(BUZZER_DEV_PATH_NAME, O_RDWR);
+    
+    if(buzzer_fd < 0){
+	    printf("fail to open buzzer\n");
+	    return -1;
+    }
+    return 0;
+}
+
+int buzzer_check(int num){
+    int situation=num-1;
+    ioctl(buzzer_fd,BUZZER_CMD_SET_DIRECTION,&situation);
 }
