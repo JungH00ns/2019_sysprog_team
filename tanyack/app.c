@@ -111,6 +111,8 @@ int main(int argc, char** argv)
         char sendBuffer[BUFFER_SIZE];
         char receiveBuffer[BUFFER_SIZE];
  
+	int flag=0;
+	
         while (1) 
         {
             int send_flag=0;
@@ -119,7 +121,7 @@ int main(int argc, char** argv)
             
             if(ultra_status==1)
                 send_flag=1;
-            else if(vib_status==2)
+            else if(vib_status==1)
                 send_flag=2; //2
 	    
             sprintf(sendBuffer,"%d\n", send_flag);
@@ -129,14 +131,22 @@ int main(int argc, char** argv)
            
             int recv_value=atoi(receiveBuffer);
           //  printf("send : %d recv : %d \n",vib_status,recv_value);
-            
-            if(recv_value!=0&&(ultra_status!=0||vib_status!=0)){
-                int temp_value;
-                ioctl(motor_fd,MOTOR_IOCTL_CMD_SET_DIRECTION,&temp_value);
-                usleep(500000);
-                ioctl(motor_fd,MOTOR_IOCTL_CMD_CLEAR_DIRECTION,&temp_value);
+
+            if(recv_value!=0){
+		flag++;
+		//flag check
+		//==0 -> motor lock
+		if(flag==1)
+		{
+		    int temp_value;
+		    ioctl(motor_fd,MOTOR_IOCTL_CMD_SET_DIRECTION,&temp_value);
+		    usleep(500000);
+		    ioctl(motor_fd,MOTOR_IOCTL_CMD_CLEAR_DIRECTION,&temp_value);
+		    flag++;
+		}
 		buzzer_check(recv_value);
-            }
+            }//recv 0 -> flag =0
+	    else if(recv_value==0){flag=0;}
             
             receiveBuffer[readBytes] = '\0';
             sleep(1);
@@ -244,6 +254,6 @@ int buzzer_init(){
 }
 
 int buzzer_check(int num){
-    int situation=num;
+    int situation=num-1;
     ioctl(buzzer_fd,BUZZER_CMD_SET_DIRECTION,&situation);
 }
