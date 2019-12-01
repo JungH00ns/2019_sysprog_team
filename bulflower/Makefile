@@ -11,3 +11,4 @@ all :
 clean : 
 	make -C $(KERNEL_DIR) M=$(PWD) clean
 	sudo rmmod flame_dev
+
