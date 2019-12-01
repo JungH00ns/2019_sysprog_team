@@ -1,18 +1,17 @@
+#include <fcntl.h>
+#include <signal.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
 #include <unistd.h>
-#include <signal.h>
 
-#include <fcntl.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
 #include <sys/ioctl.h>
-#include <sys/types.h>
+#include <sys/socket.h>
 #include <sys/stat.h>
-#include <sys/ioctl.h>
 #include <sys/sysmacros.h>
+#include <sys/types.h>
 
 #define PORT 20163
 #define BUFFER_SIZE 4096
@@ -26,15 +25,28 @@
 #define ULTRA_CMD_RECV     _IOW(ULTRA_MAGIC_NUMBER, 1,int)
 #define ULTRA_DEV_PATH_NAME "/dev/ultra_dev"
 
+//ultra define section
+#define MOTOR_MAJOR_NUMBER 504
+#define MOTOR_MINOR_NUMBER 100
+#define MOTOR_MAGIC_NUMBER 's'
+#define MOTOR_DEV_PATH_NAME "/dev/motor_dev"
+#define MOTOR_IOCTL_CMD_SET_DIRECTION _IOWR(MOTOR_MAGIC_NUMBER, 0, int)
+#define MOTOR_IOCTL_CMD_CLEAR_DIRECTION _IOWR(MOTOR_MAGIC_NUMBER,1,int)
+
 //ultra variable
 dev_t ultra_dev;
 int ultra_fd;
 
+//motor variable
+dev_t motor_dev;
+int motor_fd;
+
+//socket variable
 struct sockaddr_in connectSocket;
 
 int ultra_init();
 int ultra_check();
-
+int motor_init();
 int main(int argc, char** argv)
 {
     if (argc != 2) 
@@ -42,7 +54,6 @@ int main(int argc, char** argv)
         printf("Usage: %s IPv4-address\n", argv[0]);
         return -1;
     }
- 
  
     memset(&connectSocket, 0, sizeof(connectSocket));
  
@@ -58,29 +69,35 @@ int main(int argc, char** argv)
         return -1;
     }
     else 
-    {   ultra_init();
+    {   
+        //initialize device drivers
+        ultra_init();
+        motor_init();
+        
+        //socket variables...
         int readBytes, writtenBytes;
         char sendBuffer[BUFFER_SIZE];
         char receiveBuffer[BUFFER_SIZE];
  
         while (1) 
         {
-            //ioctl
             int ultra_status=ultra_check();
             sprintf(sendBuffer,"%d\n", ultra_status);
-//            itoa(ultra_status, sendBuffer,10);
-            //printf("Please input\n");
-            //fgets(sendBuffer,BUFF_SIZE,stdin);
- 
             write(connectFD, sendBuffer, strlen(sendBuffer));
             
             readBytes = read(connectFD, receiveBuffer, BUFF_SIZE);
-            //printf("%d bytes read\n", readBytes);
+           
             int recv_value=atoi(receiveBuffer);
-            printf("%d\n",recv_value);
+            //printf("send : %d recv : %d \n",ultra_status,recv_value);
+            
+            if(recv_value!=0&&ultra_status!=0){
+                int temp_value;
+                ioctl(motor_fd,MOTOR_IOCTL_CMD_SET_DIRECTION,&temp_value);
+                usleep(500000);
+                ioctl(motor_fd,MOTOR_IOCTL_CMD_CLEAR_DIRECTION,&temp_value);
+            }
+            
             receiveBuffer[readBytes] = '\0';
-            //fputs(receiveBuffer, stdout);
-            //fflush(stdout);
             sleep(1);
         }
     }
@@ -128,4 +145,18 @@ int ultra_check(){
         return 0;
     else
         return 1;
+}
+
+
+int motor_init(){
+    
+    motor_dev=makedev(MOTOR_MAJOR_NUMBER, MOTOR_MINOR_NUMBER);
+	mknod(MOTOR_DEV_PATH_NAME, S_IFCHR|0666, motor_dev);
+	
+	motor_fd=open(MOTOR_DEV_PATH_NAME, O_RDWR);
+	
+	if(motor_fd < 0){
+		printf("fail to open motor\n");
+		return -1;
+	}
 }
