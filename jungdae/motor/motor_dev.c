@@ -10,7 +10,7 @@
 #include <asm/io.h>
 #include <asm/uaccess.h>
 
-#define MOTOR_MAJOR_NUMBER 503
+#define MOTOR_MAJOR_NUMBER 504
 #define MOTOR_DEV_NAME   "motor_pwm"
 
 #define GPIO_BASE_ADDR 0x3F200000

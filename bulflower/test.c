@@ -37,10 +37,15 @@ int main(void){
 	}
 	printf("*****************WELCOME TO FLAME PROGRAM!*****************\n");
 	int recv_bit;
+	int time=0;
+	
 	while(1){
+		time++;
+		if(time>=5000000)
+			break;
 		ioctl(fd,FLAME_CMD_RECV,&recv_bit);
 		printf("%d\n",recv_bit);
-		usleep(50000);
+		usleep(1);
 
 	}
 	return 0;

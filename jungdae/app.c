@@ -26,7 +26,7 @@
 #define ULTRA_DEV_PATH_NAME "/dev/ultra_dev"
 
 //ultra define section
-#define MOTOR_MAJOR_NUMBER 503
+#define MOTOR_MAJOR_NUMBER 504
 #define MOTOR_MINOR_NUMBER 100
 #define MOTOR_MAGIC_NUMBER 's'
 #define MOTOR_DEV_PATH_NAME "/dev/motor_dev"
