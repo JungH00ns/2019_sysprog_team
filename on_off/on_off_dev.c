@@ -50,7 +50,7 @@ long button_ioctl(struct file * filp,  unsigned int cmd,unsigned long arg){
 		
 	}
 	
-	//copy_to_user(arg,&button_value,sizeof(int));
+	/(arg,&button_value,sizeof(int));
     
 
     return button_value; 

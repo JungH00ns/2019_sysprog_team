@@ -35,7 +35,7 @@ int main (int argc, char ** argv ){
 	int mode = MODE_OFF; 
 	while(1){
 		ioctl(on_off_fd,IOCTL_CMD_SEND,&num);
-		//printf("%d",num);
+		printf("num : %d\n",num);
 		usleep(50000);
 	}
 	
