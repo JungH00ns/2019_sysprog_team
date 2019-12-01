@@ -25,7 +25,15 @@
 #define ULTRA_CMD_RECV     _IOW(ULTRA_MAGIC_NUMBER, 1,int)
 #define ULTRA_DEV_PATH_NAME "/dev/ultra_dev"
 
-//ultra define section
+//vib define section
+#define VIB_MAJOR_NUMBER 503
+#define VIB_MINOR_NUMBER 100
+#define VIB_MAGIC_NUMBER  'v'
+#define VIB_CMD_SEND     _IOW(VIB_MAGIC_NUMBER, 0,int)
+#define VIB_CMD_RECV     _IOW(VIB_MAGIC_NUMBER, 1,int)
+#define VIB_DEV_PATH_NAME "/dev/vib_dev"
+
+//motor define section
 #define MOTOR_MAJOR_NUMBER 504
 #define MOTOR_MINOR_NUMBER 100
 #define MOTOR_MAGIC_NUMBER 's'
@@ -37,6 +45,10 @@
 dev_t ultra_dev;
 int ultra_fd;
 
+//vib variable
+dev_t vib_dev;
+int vib_fd;
+
 //motor variable
 dev_t motor_dev;
 int motor_fd;
@@ -46,7 +58,11 @@ struct sockaddr_in connectSocket;
 
 int ultra_init();
 int ultra_check();
+int vib_init();
+int vib_check();
 int motor_init();
+
+
 int main(int argc, char** argv)
 {
     if (argc != 2) 
@@ -72,6 +88,7 @@ int main(int argc, char** argv)
     {   
         //initialize device drivers
         ultra_init();
+        vib_init();
         motor_init();
         
         //socket variables...
@@ -81,16 +98,25 @@ int main(int argc, char** argv)
  
         while (1) 
         {
+            int send_flag=0;
             int ultra_status=ultra_check();
-            sprintf(sendBuffer,"%d\n", ultra_status);
+            int vib_status=vib_check();
+            
+            if(ultra_status==1)
+                send_flag=1;
+            else if(vib_status==1)
+                send_flag=1; //2
+            
+            sprintf(sendBuffer,"%d\n", send_flag);
             write(connectFD, sendBuffer, strlen(sendBuffer));
             
             readBytes = read(connectFD, receiveBuffer, BUFF_SIZE);
            
             int recv_value=atoi(receiveBuffer);
-            //printf("send : %d recv : %d \n",ultra_status,recv_value);
+          //  printf("send : %d recv : %d \n",vib_status,recv_value);
             
-            if(recv_value!=0&&ultra_status!=0){
+            if(recv_value!=0&&(ultra_status!=0||vib_status!=0)){
+                printf("helelel\n");
                 int temp_value;
                 ioctl(motor_fd,MOTOR_IOCTL_CMD_SET_DIRECTION,&temp_value);
                 usleep(500000);
@@ -104,6 +130,8 @@ int main(int argc, char** argv)
  
     close(connectFD);
     close(ultra_fd);
+    close(vib_fd);
+    close(motor_fd);
     return 0;
 }  
 
@@ -146,7 +174,28 @@ int ultra_check(){
     else
         return 1;
 }
+int vib_init(){
+    vib_dev = makedev(VIB_MAJOR_NUMBER , VIB_MINOR_NUMBER);
+	
+	mknod(VIB_DEV_PATH_NAME ,S_IFCHR|0666 , vib_dev);
+	
+	vib_fd=open(VIB_DEV_PATH_NAME,O_RDWR);
+	
+	if(vib_fd<0)
+	{
+		printf("fail to open vib\n");
+		return -1;
+	}
+}
+int vib_check(){
+    int recv_bit;
 
+    //recv_bit=1;
+    ioctl(vib_fd,VIB_CMD_SEND,&recv_bit);
+    printf("now = %d\n",recv_bit);
+   // usleep(500000);
+	return recv_bit/4194304;
+}
 
 int motor_init(){
     
@@ -159,4 +208,5 @@ int motor_init(){
 		printf("fail to open motor\n");
 		return -1;
 	}
+    return 0;
 }

@@ -1,14 +1,13 @@
 KERNEL_VER := 4.19.75-v7+
 KERNEL_DIR = /lib/modules/$(KERNEL_VER)/build
 
-obj-m := flame_dev.o 
+obj-m := motor_dev.o 
 
 PWD := $(shell pwd) 
 
 all : 
 	make -C $(KERNEL_DIR) M=$(PWD) modules
-	sudo insmod flame_dev.ko
+	sudo insmod motor_dev.ko
 clean : 
 	make -C $(KERNEL_DIR) M=$(PWD) clean
-	sudo rmmod flame_dev
-
+	sudo rmmod motor_dev

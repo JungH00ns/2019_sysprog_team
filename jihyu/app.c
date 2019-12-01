@@ -1,17 +1,77 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <signal.h>
+#include <fcntl.h> 
+
+#include <sys/ioctl.h> 
+#include <sys/types.h> 
+#include <sys/sysmacros.h>  
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <unistd.h>
-#include <signal.h>
- 
+
+// button define section
+#define BUTTON_MAJOR_NUMBER 506
+#define BUTTON_MINOR_NUMBER 100
+#define BUTTON_DEV_PATH 	"/button_dev"
+#define IOCTL_MAGIC_NUMBER 		 'b'
+#define IOCTL_CMD_SET_LED_ON     _IO(IOCTL_MAGIC_NUMBER, 0)
+#define IOCTL_CMD_SET_LED_OFF    _IO(IOCTL_MAGIC_NUMBER, 1)
+#define INTERVAL 		50000
+#define SITUATION_ON 	0 
+#define SITUATION_OFF 	1
+
+// socket define section
 #define PORT 20163
 #define BUFFER_SIZE 4096
 #define BUFF_SIZE 100
-# define LISTEN_QUEUE_SIZE 5
- 
+#define LISTEN_QUEUE_SIZE 5
+
+// button variable
+dev_t button_dev;
+int button_fd; 
+int status = SITUATION_OFF; 
+int current_button_value = 0, prev_button_value=0; 
+
+int button_init(){
+    button_dev=makedev(BUTTON_MAJOR_NUMBER, BUTTON_MINOR_NUMBER);
+	mknod(BUTTON_DEV_PATH, S_IFCHR|0666, button_dev);
+	button_fd = open(BUTTON_DEV_PATH, O_RDONLY);
+	if (button_fd < 0) { 
+		printf("failed to open button device\n"); 
+		return -1;
+	} 
+    return 0;
+}
+
+int button_status(int situ){
+    if(situ==0){
+        return -1;
+    }
+    
+	
+    usleep(INTERVAL); 
+    prev_button_value = current_button_value; 
+    read(button_fd, &current_button_value, sizeof(int));
+    
+    if (prev_button_value == 0 && current_button_value != 0) {
+        if (status == SITUATION_ON) {
+            //off
+            status = SITUATION_OFF;  
+            printf("status : %d\n",status);
+            return status;
+        }
+        else { 
+            //on 
+            status = SITUATION_ON; 
+            printf("status : %d\n",status);
+            return status;
+        } 
+    }		
+	return -1;
+}
 void childHandler(int signal)
 {
     
@@ -88,27 +148,67 @@ int main() {
                 close(listenFD);
  
                 ssize_t receivedBytes;
- 
+                int client_state=0;
+                
                 while((receivedBytes = read(connectFD, readBuff, BUFF_SIZE)) > 0)
                 {                
- 
                     printf("%lu bytes read\n", receivedBytes);
                     readBuff[receivedBytes] = '\0';
                     fputs(readBuff, stdout);
                     fflush(stdout);
-                    //sprintf(sendBuff,"%s",readBuff);
-                    //write(connectFD, sendBuff, strlen(sendBuff));
-                    if(!strncmp(readBuff,"aaa",3)){
-                        //sprintf(sendBuff,"%s",readBuff);
-                        //write(connectFD, sendBuff, strlen(sendBuff));
-                        write(connectFD,"111",3);
-                    }
-                    else if(!strncmp(readBuff,"bbb",3)){
-                        //sprintf(sendBuff,"%s",readBuff);
-                        //write(connectFD, sendBuff, strlen(sendBuff));
-                        write(connectFD,"222",3);
-                    }
+                    int button_state=button_status();
                     
+                    if(!strncmp(readBuff,"0",1)){
+                        //alert event not occuerd
+                        if(client_state!=0){
+                            write(connectFD,adsfa,1);
+                        }
+                        else if(client_state==0)
+                            write(connectFD,"0",1);
+                    }
+                    else if(!strncmp(readBuff,"1",1)){
+                        //tanyack susang! - ultra
+                        if(client_status==0){
+                            if(button_status==1){
+                                write(connectFD,"0",1);
+                            }
+                            else if(button_status==0){
+                                write(connectFD,"1",1);
+                                client_state=1;
+                            }
+                        }
+                        else if(client_status!=0){
+                            if(button_status==1){
+                                write(connectFD,"0",1);
+                                client_state=0;
+                            }
+                            else if(button_status==0){
+                                write(connectFD,"1",1);
+                                client_state=1;
+                            }
+                          //  write(connectFD,"1",1);
+                        }
+                    }
+                    else if(!strncmp(readBuff,"2",1)){
+                        //tanyack susang! - vibrater
+                        write(connectFD,"2",1);
+                        client_state=2;
+                    }
+                    else if(!strncmp(readBuff,"3",1)){
+                        //jungdae susang! - fire
+                        write(connectFD,"3",1);
+                        client_state=3;
+                    }
+                    else if(!strncmp(readBuff,"4",1)){
+                        //jungdae susang! - ultra
+                        write(connectFD,"4",1);
+                        client_state=4;
+                    }
+                    else if(!strncmp(readBuff,"5",1)){
+                        //temp temp
+                        write(connectFD,"5",1);
+                        client_state=5;
+                    }
                 }
                 
                 close(connectFD); 
@@ -122,7 +222,7 @@ int main() {
         
     }
     close(listenFD);
- 
+    close(button_fd); 
     return 0;
 }
 
