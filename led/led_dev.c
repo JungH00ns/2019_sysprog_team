@@ -47,17 +47,8 @@ int led_open(struct inode * inode, struct file * filp){
     gpclr0 = (volatile unsigned int *)(gpio_base + GPCLR0);
     gplev0 = (volatile unsigned int *)(gpio_base + GPLEV0);
     gpsel0 = (volatile unsigned int *)(gpio_base + GPFSEL0); 
-   // *gpsel1&=(0<<31);
-    //*gpsel1|=(1<<18);   //R
-    //*gpsel2&=(0<<31);
-    //*gpsel2|=(1<<0);       //G
-    *gpsel0&=(0<<31);
-    *gpsel0|=(1<<18);    //B
-    *gpsel0|=(1<<15);    //B
 
-    *gpsel0|=(1<<12);    //B
-    
-//    printk(KERN_INFO "gpsel0 : %d\n", *gpsel0);
+
     return 0; 
 }
 
@@ -70,76 +61,63 @@ int led_release(struct inode * inode, struct file * filp) {
 long led_ioctl(struct file * filp, unsigned int cmd, unsigned long arg)
 { 
     int color=0;
+    *gpsel1&=(0<<20);
+    *gpsel1|=(1<<18);
+    
+    *gpsel0&=(0<<20);
+    *gpsel0|=(1<<15);
+    
+    *gpsel2&=(0<<3);
+    *gpsel2|=(1);
+    
     switch (cmd){ 
 	case LED_CMD_SEND: 
 	    copy_from_user(&color,(const void*)arg,4);
-	    printk(KERN_INFO "%d\n",color);
-    
-    	    printk(KERN_INFO "%d: %d %d init\n", *gpset0, *gpclr0 ,*gplev0);
-
-	    *gpclr0|=(1<<5);
-	    printk(KERN_INFO "%d: %d %d init\n", *gpset0, *gpclr0 ,*gplev0);
-
-	    *gpclr0|=(1<<4);
-	    printk(KERN_INFO "%d: %d %d init\n", *gpset0, *gpclr0 ,*gplev0);
-
-	    *gpclr0|=(1<<6);
-	    printk(KERN_INFO "%d: %d %d init\n", *gpset0, *gpclr0 ,*gplev0);
 
 	    if(color==1){	//red
-		printk(KERN_INFO "%d: %d %d %d red\n",color, *gpset0, *gpclr0 ,*gplev0);
-		
-		*gpset0|=(1<<6);			
-		printk(KERN_INFO "%d: %d %d %d red\n",color, *gpset0, *gpclr0,*gplev0);
-		
-		*gpclr0|=(1<<5);
-		printk(KERN_INFO "%d: %d %d %d red\n",color, *gpset0, *gpclr0,*gplev0);
-		
-		*gpclr0|=(1<<4);
-		printk(KERN_INFO "%d: %d %d %d red\n",color, *gpset0, *gpclr0,*gplev0);
-	    
+		*gpset0|=(1<<20);
+		*gpset0|=(1<<16);
+		*gpset0|=(1<<5);
+		*gpsel0&=(0<<20);
+		*gpsel2&=(0<<3);
 	    }
 	    else if(color==2){	//green
-		
-		
-		
-		printk(KERN_INFO "%d: %d %d %d green\n",color, *gpset0, *gpclr0,*gplev0);
-		
-		*gpclr0|=(1<<6);
-		printk(KERN_INFO "%d: %d %d %d green\n",color, *gpset0, *gpclr0,*gplev0);
-		*gpclr0|=(1<<4);
-
-		printk(KERN_INFO "%d: %d %d %d green\n",color, *gpset0, *gpclr0,*gplev0);
+		*gpset0|=(1<<20);
+		*gpset0|=(1<<16);
 		*gpset0|=(1<<5);
-		printk(KERN_INFO "%d: %d %d %d green\n",color, *gpset0, *gpclr0,*gplev0);
+		*gpsel0&=(0<<20);
+		*gpsel1&=(0<<20);
 	    }
-	    else if(color==4){		//blue
-		printk(KERN_INFO "%d: %d %d %d blue\n",color, *gpset0, *gpclr0,*gplev0);
-		*gpset0|=(1<<4);
-				
-		printk(KERN_INFO "%d: %d %d %d blue\n",color, *gpset0, *gpclr0,*gplev0);
-		
-		*gpclr0|=(1<<6);		
-		printk(KERN_INFO "%d: %d %d %d blue\n",color, *gpset0, *gpclr0,*gplev0);
-		*gpclr0|=(1<<5);
-		printk(KERN_INFO "%d: %d %d %d blue\n",color, *gpset0, *gpclr0,*gplev0);
-		
-		
-	
+	    else if(color==3){		//blue
+		*gpset0|=(1<<20);
+		*gpset0|=(1<<16);
+		*gpset0|=(1<<5);
+		*gpsel1&=(0<<20);
+		*gpsel2&=(0<<3);
 	    }
-	    msleep(2000); //2sec
-	    if(color==1){	//red
-	    //	*gpclr0|=(1<<16);
-	    
+	    else if(color == 4 ){ //red green
+		*gpset0|=(1<<20);
+		*gpset0|=(1<<16);
+		*gpset0|=(1<<5);
+		*gpsel0&=(0<<20);
 	    }
-	    if(color==2){	//green
-	    //	*gpclr0|=(1<<20);
-	    
+	    else if(color == 5 ){ //red blue
+		*gpset0|=(1<<20);
+		*gpset0|=(1<<16);
+		*gpset0|=(1<<5);
+		*gpsel2&=(0<<3);
 	    }
-	    if(color==4){		//blue
-	    //*gpclr0|=(1<<5);
+	    else if(color == 6 ){ //green blue
+		*gpset0|=(1<<20);
+		*gpset0|=(1<<16);
+		*gpset0|=(1<<5);
+		*gpsel1&=(0<<20);
 	    }
-	
+	    else if(color == 7 ){ //red green blue
+		*gpset0|=(1<<20);
+		*gpset0|=(1<<16);
+		*gpset0|=(1<<5);
+	    }
 	    break; 
 	    
 	    

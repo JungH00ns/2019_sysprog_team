@@ -30,22 +30,13 @@ int main(void){
 		printf("fail to open led\n");
 		return -1;
 	}
-	printf("*****************WELCOME TO FLAME PROGRAM!*****************\n");
-	int recv_bit=1;
-	recv_bit=0;
+	printf("*****************WELCOME TO LED PROGRAM!*****************\n");
+	int recv_bit;
+	for(int i=1 ; i<=7 ; i++)
+	{
+		recv_bit=i;
 		ioctl(fd,LED_CMD_SEND,&recv_bit);
-		recv_bit=1;
-		ioctl(fd,LED_CMD_SEND,&recv_bit);
-		printf("%d\n",recv_bit);
-		//sleep(1);
-		recv_bit=2;
-		ioctl(fd,LED_CMD_SEND,&recv_bit);
-		printf("%d\n",recv_bit);
-		//sleep(1);
-		recv_bit=4;
-		ioctl(fd,LED_CMD_SEND,&recv_bit);
-		printf("%d\n",recv_bit);
-		//sleep(1);
-
+		sleep(1);
+	}
 	return 0;
 }
