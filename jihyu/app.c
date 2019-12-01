@@ -161,6 +161,7 @@ int main() {
                     if(!strncmp(readBuff,"0",1)){
                         //alert event not occuerd
                         if(client_state!=0){
+                            sprintf();
                             write(connectFD,adsfa,1);
                         }
                         else if(client_state==0)
