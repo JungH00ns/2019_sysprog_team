@@ -47,10 +47,15 @@ int led_open(struct inode * inode, struct file * filp){
     gpclr0 = (volatile unsigned int *)(gpio_base + GPCLR0);
     gplev0 = (volatile unsigned int *)(gpio_base + GPLEV0);
     gpsel0 = (volatile unsigned int *)(gpio_base + GPFSEL0); 
-    *gpsel1|=(1<<18);   //R
-    *gpsel2&=(0<<2);
-    *gpsel2|=(1<<0);       //G
+   // *gpsel1&=(0<<31);
+    //*gpsel1|=(1<<18);   //R
+    //*gpsel2&=(0<<31);
+    //*gpsel2|=(1<<0);       //G
+    *gpsel0&=(0<<31);
+    *gpsel0|=(1<<18);    //B
     *gpsel0|=(1<<15);    //B
+    *gpsel0|=(1<<12);    //B
+    
 //    printk(KERN_INFO "gpsel0 : %d\n", *gpsel0);
     return 0; 
 }
@@ -74,22 +79,22 @@ long led_ioctl(struct file * filp, unsigned int cmd, unsigned long arg)
 	    *gpclr0|=(1<<5);
 	    printk(KERN_INFO "%d: %d %d init\n", *gpset0, *gpclr0 ,*gplev0);
 
-	    *gpclr0|=(1<<20);
+	    *gpclr0|=(1<<4);
 	    printk(KERN_INFO "%d: %d %d init\n", *gpset0, *gpclr0 ,*gplev0);
 
-	    *gpclr0|=(1<<16);
+	    *gpclr0|=(1<<6);
 	    printk(KERN_INFO "%d: %d %d init\n", *gpset0, *gpclr0 ,*gplev0);
 
 	    if(color==1){	//red
 		printk(KERN_INFO "%d: %d %d %d red\n",color, *gpset0, *gpclr0 ,*gplev0);
 		
-		*gpset0|=(1<<16);			
-		printk(KERN_INFO "%d: %d %d %d red\n",color, *gpset0, *gpclr0,*gplev0);
-		
-		*gpclr0|=(1<<20);
+		*gpset0|=(1<<6);			
 		printk(KERN_INFO "%d: %d %d %d red\n",color, *gpset0, *gpclr0,*gplev0);
 		
 		*gpclr0|=(1<<5);
+		printk(KERN_INFO "%d: %d %d %d red\n",color, *gpset0, *gpclr0,*gplev0);
+		
+		*gpclr0|=(1<<4);
 		printk(KERN_INFO "%d: %d %d %d red\n",color, *gpset0, *gpclr0,*gplev0);
 	    
 	    }
@@ -98,26 +103,27 @@ long led_ioctl(struct file * filp, unsigned int cmd, unsigned long arg)
 		
 		
 		printk(KERN_INFO "%d: %d %d %d green\n",color, *gpset0, *gpclr0,*gplev0);
-		*gpset0|=1048576;
-		printk(KERN_INFO "%d: %d %d %d green\n",color, *gpset0, *gpclr0,*gplev0);
-		*gpclr0|=65536;
-		printk(KERN_INFO "%d: %d %d %d green\n",color, *gpset0, *gpclr0,*gplev0);
-		*gpclr0|=32;
-		printk(KERN_INFO "%d: %d %d %d green\n",color, *gpset0, *gpclr0,*gplev0);
 		
+		*gpclr0|=(1<<6);
+		printk(KERN_INFO "%d: %d %d %d green\n",color, *gpset0, *gpclr0,*gplev0);
+		*gpclr0|=(1<<4);
+
+		printk(KERN_INFO "%d: %d %d %d green\n",color, *gpset0, *gpclr0,*gplev0);
+		*gpset0|=(1<<5);
+		printk(KERN_INFO "%d: %d %d %d green\n",color, *gpset0, *gpclr0,*gplev0);
 	    }
 	    else if(color==4){		//blue
 		printk(KERN_INFO "%d: %d %d %d blue\n",color, *gpset0, *gpclr0,*gplev0);
-		
-		*gpset0|=32;
+		*gpset0|=(1<<4);
 				
 		printk(KERN_INFO "%d: %d %d %d blue\n",color, *gpset0, *gpclr0,*gplev0);
 		
-		*gpclr0|=1048576;			
+		*gpclr0|=(1<<6);		
 		printk(KERN_INFO "%d: %d %d %d blue\n",color, *gpset0, *gpclr0,*gplev0);
-		*gpclr0|=65536;	
+		*gpclr0|=(1<<5);
 		printk(KERN_INFO "%d: %d %d %d blue\n",color, *gpset0, *gpclr0,*gplev0);
-	
+		
+		
 	
 	    }
 	    msleep(2000); //2sec
