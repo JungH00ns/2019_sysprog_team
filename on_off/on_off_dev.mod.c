@@ -28,12 +28,9 @@ __attribute__((section("__versions"))) = {
 	{ 0xf230cadf, "module_layout" },
 	{ 0x6bc3fbc0, "__unregister_chrdev" },
 	{ 0xe549e5f5, "__register_chrdev" },
-	{ 0xdb7305a1, "__stack_chk_fail" },
-	{ 0xf4fa543b, "arm_copy_to_user" },
-	{ 0x8f678b07, "__stack_chk_guard" },
 	{ 0xedc03953, "iounmap" },
-	{ 0x2e5810c6, "__aeabi_unwind_cpp_pr1" },
 	{ 0xe97c4103, "ioremap" },
+	{ 0x2e5810c6, "__aeabi_unwind_cpp_pr1" },
 	{ 0x7c32d0f0, "printk" },
 	{ 0xb1ad28e0, "__gnu_mcount_nc" },
 };
@@ -44,4 +41,4 @@ __attribute__((section(".modinfo"))) =
 "depends=";
 
 
-MODULE_INFO(srcversion, "EA6D4BD4A10F0FBD90F2F00");
+MODULE_INFO(srcversion, "711FE33F0BAA149ED19D69F");
