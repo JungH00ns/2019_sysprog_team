@@ -74,11 +74,13 @@ int main(int argc, char** argv)
  
             write(connectFD, sendBuffer, strlen(sendBuffer));
             
-            //readBytes = read(connectFD, receiveBuffer, BUFF_SIZE);
+            readBytes = read(connectFD, receiveBuffer, BUFF_SIZE);
             //printf("%d bytes read\n", readBytes);
-           // receiveBuffer[readBytes] = '\0';
-           // fputs(receiveBuffer, stdout);
-           // fflush(stdout);
+            int recv_value=atoi(receiveBuffer);
+            printf("%d\n",recv_value);
+            receiveBuffer[readBytes] = '\0';
+            //fputs(receiveBuffer, stdout);
+            //fflush(stdout);
             sleep(1);
         }
     }
