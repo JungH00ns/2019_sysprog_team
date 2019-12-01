@@ -32,7 +32,8 @@ int main(void){
 	}
 	printf("*****************WELCOME TO FLAME PROGRAM!*****************\n");
 	int recv_bit=1;
-	
+	recv_bit=0;
+		ioctl(fd,LED_CMD_SEND,&recv_bit);
 		recv_bit=1;
 		ioctl(fd,LED_CMD_SEND,&recv_bit);
 		printf("%d\n",recv_bit);
