@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <fcntl.h> 
+#include <pthread.h>
 
 #include <sys/ioctl.h> 
 #include <sys/types.h> 
@@ -16,6 +17,11 @@
 #define BUTTON_MAJOR_NUMBER 506
 #define BUTTON_MINOR_NUMBER 100
 #define BUTTON_DEV_PATH 	"/button/simple_button_dev"
+// led define section
+#define LED_MAJOR_NUMBER	507
+#define LED_MINOR_NUMBER 100
+#define LED_DEV_PATH_NAME "/led/led_dev"
+
 #define IOCTL_MAGIC_NUMBER 		 'b'
 #define IOCTL_CMD_SET_LED_ON     _IO(IOCTL_MAGIC_NUMBER, 0)
 #define IOCTL_CMD_SET_LED_OFF    _IO(IOCTL_MAGIC_NUMBER, 1)
@@ -30,12 +36,30 @@
 #define BUFFER_SIZE 4096
 #define BUFF_SIZE 100
 #define LISTEN_QUEUE_SIZE 5
+void *myFunc(void *arg); 
 
 // button variable
 dev_t button_dev;
 int button_fd; 
+// led variable
+dev_t led_dev;
+int led_fd;
+
 int status = SITUATION_OFF; 
 int current_button_value = 0, prev_button_value=0; 
+int client_state=0;
+
+int led_init(){
+    
+	led_dev=makedev(LED_MAJOR_NUMBER, LED_MINOR_NUMBER);
+	mknod(LED_DEV_PATH_NAME, S_IFCHR|0666, led_dev);
+	led_fd=open(LED_DEV_PATH_NAME, O_RDWR);
+	if(led_fd < 0){
+		printf("fail to open led\n");
+		return -1;
+	}
+    return 0;
+}
 
 int button_init(){
     button_dev=makedev(BUTTON_MAJOR_NUMBER, BUTTON_MINOR_NUMBER);
@@ -53,7 +77,6 @@ int button_status(int situ){
         return 0;
     }
     
-	
     usleep(INTERVAL); 
     prev_button_value = current_button_value; 
     //read(button_fd, &current_button_value, sizeof(int));
@@ -74,26 +97,12 @@ int button_status(int situ){
     }		
 	return 0;
 }
-void childHandler(int signal)
-{
-    
-    int status;
-    pid_t spid;
-    while((spid = waitpid(-1, &status, WNOHANG)) > 0)
-    {
-        printf("================================\n");
-        printf("PID         : %d\n", spid);
-        printf("Exit Value  : %d\n", WEXITSTATUS(status));
-        printf("Exit Stat   : %d\n", WIFEXITED(status));
-    }
-}
  
 int main() {
  
-    signal(SIGCHLD, (void *)childHandler);    
- 
     struct sockaddr_in listenSocket;
- 
+    pthread_t thread_t;
+	int th_id; 
     memset(&listenSocket, 0, sizeof(listenSocket));
  
     listenSocket.sin_family = AF_INET;
@@ -102,13 +111,6 @@ int main() {
  
     int listenFD = socket(AF_INET, SOCK_STREAM, 0);
     int connectFD;
- 
-    ssize_t receivedBytes;
-    char readBuff[BUFFER_SIZE];
-    char sendBuff[BUFFER_SIZE];
-    pid_t pid;
- 
- 
     if (bind(listenFD, (struct sockaddr *) &listenSocket, sizeof(listenSocket)) == -1) {
         printf("Can not bind.\n");
         return -1;
@@ -129,39 +131,34 @@ int main() {
  
         while((connectFD = accept(listenFD, (struct sockaddr*)&connectSocket, (socklen_t *)&connectSocketLength)) >= 0)
         {
-            getpeername(connectFD, (struct sockaddr*)&peerSocket, &connectSocketLength);
- 
-            char peerName[sizeof(peerSocket.sin_addr) + 1] = { 0 };
-            sprintf(peerName, "%s", inet_ntoa(peerSocket.sin_addr));
- 
-            if(strcmp(peerName,"0.0.0.0") != 0)
-                printf("Client : %s\n", peerName);
-        
- 
-            if (connectFD < 0)
-            {
-                printf("Server: accept failed\n");
-                exit(0);
+            th_id = pthread_create(&thread_t, NULL, myFunc, (void *)&connectFD);
+            if(th_id != 0){
+                perror("Thread Create Error");
+                return 1;
             }
-            pid = fork();
- 
-            if(pid == 0)
-            {    
-                close(listenFD);
- 
-                ssize_t receivedBytes;
-                int client_state=0;
-                char arr[1024]={0,};    //
-                while((receivedBytes = read(connectFD, readBuff, BUFF_SIZE)) > 0)
-                {                
-                    printf("%lu bytes read\n", receivedBytes);
-                    readBuff[receivedBytes] = '\0';
-                    fputs(readBuff, stdout);
+        }
+    }
+    close(listenFD);
+    return 0;
+}
+void *myFunc(void *arg)
+{
+	char readBuff[BUFFER_SIZE];
+    char sendBuff[BUFFER_SIZE];
+	int connectFD;
+	int receivedBytes;
+    
+    char arr[1024]={0,};    //
+	connectFD = *((int *)arg);
+    
+ 	printf("enter client :  %d\n",connectFD);
+                
+    while((receivedBytes = read(connectFD, readBuff, BUFF_SIZE)) > 0)
+    {                
+        readBuff[receivedBytes] = '\0';
+        fputs(readBuff, stdout);
                     fflush(stdout);
                     int button_state=0; //
-                  //  button_state=atoi(readBuff);    //
-                    
-                   // button_state=button_status(button_state); //
                       printf("client : %d\n", client_state);
 
                     if(!strncmp(readBuff,"0",1)){
@@ -169,7 +166,6 @@ int main() {
                         printf("read0\n");
                         if(client_state!=0){
                             sprintf(arr, "%d\n", client_state);
-                            //sprintf()
                             write(connectFD,arr,1);
                         }
                         else if(client_state==0){
@@ -192,7 +188,7 @@ int main() {
                            // }
                         }
                         else if(client_state!=0){ //
-sprintf(arr, "%d\n", client_state);
+            sprintf(arr, "%d\n", client_state);
                             //sprintf()
                             write(connectFD,arr,1);
                            /* if(button_state==1){
@@ -244,19 +240,5 @@ sprintf(arr, "%d\n", client_state);
                         client_state=5;
                     }
                 }
-                
-                close(connectFD); 
-                return 0; 
-    
-            }
- 
-            else
-                close(connectFD);
-        }
-        
-    }
-    close(listenFD);
-    close(button_fd); 
-    return 0;
 }
 
