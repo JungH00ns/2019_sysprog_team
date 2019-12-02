@@ -129,7 +129,7 @@ int main(int argc, char** argv)
             readBytes = read(connectFD, receiveBuffer, BUFF_SIZE);
            
             int recv_value=atoi(receiveBuffer);
-            printf("send : %d recv : %d \n",ultra_status,recv_value);
+            printf("send : %d recv : %d \n",send_flag,recv_value);
             
             if(recv_value!=0){
                 flag++;
