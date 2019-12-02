@@ -15,7 +15,7 @@
 
 #define FLAME_BASE_ADDRESS	0x3F200000
 
-#define GPFSEL1 0x00
+#define GPFSEL0 0x00
 #define GPSET0	0x1C
 #define GPCLR0	0x28
 #define GPLEV0  0x34
@@ -34,20 +34,16 @@ int flame_open(struct inode * inode, struct file * filp){
     printk(KERN_ALERT "flame driver open\n"); 
 
     gpio_base = ioremap(FLAME_BASE_ADDRESS, 0x60); 
-    gpsel0 = (volatile unsigned int *)(gpio_base + GPFSEL1);
+    gpsel0 = (volatile unsigned int *)(gpio_base + GPFSEL0);
     gpset0 = (volatile unsigned int *)(gpio_base + GPSET0);
     gpclr0 = (volatile unsigned int *)(gpio_base + GPCLR0);
     gplev0 = (volatile unsigned int *)(gpio_base + GPLEV0);
-<<<<<<< HEAD
     //printk(KERN_INFO "gpsel1 : %x \n",*gpsel1);
 
-    *gpsel1 &= (0<<8);
     //*gpsel1 |= (1<<23);
     //printk(KERN_INFO "gpsel1 : %x \n",*gpsel1);
-=======
 
     *gpsel0 &=(0b000111111111111);
->>>>>>> 44c0da42eb1997cad9ce67e3fbde38c57fe62d0b
 
 
     return 0; 
@@ -72,7 +68,7 @@ long flame_ioctl(struct file * filp, unsigned int cmd, unsigned long arg)
         case FLAME_CMD_RECV:
         tmp = ((*gplev0) & (0x01 << 4));
         
-	    //printk(KERN_INFO "signal : %d \n",tmp);
+	    printk(KERN_INFO "signal : %d \n",tmp);
         //msleep(1000); //1sec
         copy_to_user(arg,&tmp,sizeof(int));
         break;

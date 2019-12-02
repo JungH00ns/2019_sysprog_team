@@ -39,13 +39,9 @@ int main(void){
 	int recv_bit;
 	int time=0;
 	while(1){
-		time++;
-		if(time>=5000000)
-			break;
 		ioctl(fd,FLAME_CMD_RECV,&recv_bit);
 		printf("%d ",recv_bit);
-		usleep(1);
-		if(++time==5000){break;}
+		sleep(1);
 	}
 	return 0;
 }
