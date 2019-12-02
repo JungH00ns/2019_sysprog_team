@@ -1,90 +1,95 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include<unistd.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <signal.h>
+#include <pthread.h>
 
-#include<arpa/inet.h> //AF_INET 외부 내트워크 도메인
-#include<sys/types.h>
-#include<sys/socket.h>
+#define PORT 20163
+#define BUFFER_SIZE 4096
+#define BUFF_SIZE 100
+# define LISTEN_QUEUE_SIZE 5
+void *myFunc(void *arg); 
 
-#define MAXLINE 511
-
-int main(int argc,char* argv[]){
-    int serv_sock;
-    int conn_sock;
-
-    struct sockaddr_in serv_addr;
-    struct sockaddr_in conn_addr;
-
-    int addrlen, datalen;
-
-    char buf[MAXLINE +1];
-    int nbytes;
-
+int main() {
+ 	pthread_t thread_t;
+	int th_id;  
+ 
+    struct sockaddr_in listenSocket;
+ 
+    memset(&listenSocket, 0, sizeof(listenSocket));
+ 
+    listenSocket.sin_family = AF_INET;
+    listenSocket.sin_addr.s_addr = htonl(INADDR_ANY);
+    listenSocket.sin_port = htons(PORT);
+ 
+    int listenFD = socket(AF_INET, SOCK_STREAM, 0);
+    int connectFD;
+ int result;
+    ssize_t receivedBytes;
+    char readBuff[BUFFER_SIZE];
+    char sendBuff[BUFFER_SIZE];
     pid_t pid;
-
-    if(argc != 2){
-        printf("Usage : %s <port>\n",argv[0]);
-        exit(0);
+ 
+ 
+    if (bind(listenFD, (struct sockaddr *) &listenSocket, sizeof(listenSocket)) == -1) {
+        printf("Can not bind.\n");
+        return -1;
     }
-
-    serv_sock = socket(PF_INET,SOCK_STREAM, IPPROTO_TCP); 
-    if(serv_sock == -1){
-        perror("socket() error\n");
-        exit(0);
+ 
+    if (listen(listenFD, LISTEN_QUEUE_SIZE) == -1) {
+        printf("Listen fail.\n");
+        return -1;
     }
-
-    memset(&serv_addr, 0, sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    serv_addr.sin_port = htons(atoi(argv[1]));
-
-    if(bind(serv_sock, (struct sockaddr*)&serv_addr,sizeof(serv_addr)) == -1){
-        perror("bind() error\n"); //bind(). 
-        exit(0);
-    }
-
-    if(listen(serv_sock,1) == -1){ 
-        perror("listen() error\n");
-        exit(0);
-    }
-
-    addrlen = sizeof(conn_sock);
-    
-    conn_sock = accept(serv_sock, (struct sockaddr*)&conn_addr, &addrlen); 
-
-    if(conn_sock == -1){
-        perror("accept() error\n");
-        exit(0);
-    }
-
-    if((pid=fork())==-1){close(conn_sock);perror("fork() error");exit(0);}
-    else if (pid == 0){ 
-
-        while(1){
-            fgets(buf,sizeof(buf),stdin);
-            nbytes = strlen(buf);
-            write(conn_sock,buf,MAXLINE);
-            if((strncmp,"exit",4) == 0){
-                puts("Good Bye.");
-                exit(0);
-            } 
-        }     
-        exit(0);
-    }
-
-    else if(pid>0){ 
-        while(1){
-            if((nbytes = read(conn_sock,buf,MAXLINE)) <0){
-                perror("read() error\n");
-                exit(0);
-            }
-            printf("%s",buf);
-            if(strncmp(buf,"exit",4) == 0)
-                exit(0);
-            } 
-        }     
+ 
+    printf("Waiting for clients...\n");
+ 
+    while (1) 
+    {
+	
+        struct sockaddr_in connectSocket, peerSocket;
+ 
+        socklen_t connectSocketLength = sizeof(connectSocket);
+ 
+        while((connectFD = accept(listenFD, (struct sockaddr*)&connectSocket, (socklen_t *)&connectSocketLength)) >= 0)
+        {
+		th_id = pthread_create(&thread_t, NULL, myFunc, (void *)&connectFD);
+		if(th_id != 0){
+			perror("Thread Create Error");
+			return 1;
+		}
+        }
+ 
+     }
+    close(listenFD);
+ 
     return 0;
 }
 
-
+void *myFunc(void *arg)
+{
+	char readBuff[BUFFER_SIZE];
+    	char sendBuff[BUFFER_SIZE];
+	int connectFD;
+	int receivedBytes;
+	connectFD = *((int *)arg);
+ 	printf("enter client :  %d\n",connectFD);
+                while((receivedBytes = read(connectFD, readBuff, BUFF_SIZE)) > 0)
+                {                
+ 
+                    printf("%lu bytes read\n", receivedBytes);
+                    readBuff[receivedBytes] = '\0';
+                    fputs(readBuff, stdout);
+                    fflush(stdout);
+                    if(!strncmp(readBuff,"0",1)){
+                        write(connectFD,"0",1);
+                    }
+                    else if(!strncmp(readBuff,"1",1)){
+                        write(connectFD,"1",1);
+                    }
+                    
+                }
+}
