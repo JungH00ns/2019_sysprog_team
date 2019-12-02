@@ -99,7 +99,7 @@ int main(int argc, char** argv)
         return -1;
     }
     else 
-    {   
+    {
         //initialize device drivers
         ultra_init();
         vib_init();
@@ -119,10 +119,13 @@ int main(int argc, char** argv)
             int ultra_status=ultra_check();
             int vib_status=vib_check();
             
-            if(ultra_status==1)
-                send_flag=1;
-            else if(vib_status==1)
-                send_flag=2; //2
+	    if(send_flag != 4)
+	    {
+		if(ultra_status==1)
+		    send_flag=1;
+		else if(vib_status==1)
+		    send_flag=2; //2
+	    }
 	    
             sprintf(sendBuffer,"%d\n", send_flag);
             write(connectFD, sendBuffer, strlen(sendBuffer));
@@ -130,7 +133,8 @@ int main(int argc, char** argv)
             readBytes = read(connectFD, receiveBuffer, BUFF_SIZE);
            
             int recv_value=atoi(receiveBuffer);
-            printf(" recv : %d \n",recv_value);
+	    if(recv_value == 4 ){send_flag=4;}
+            printf(" recv : %d send : %d\n",recv_value,send_flag);
 
             if(recv_value!=0){
 		flag++;
@@ -146,7 +150,7 @@ int main(int argc, char** argv)
 		}
 		buzzer_check(recv_value);
             }//recv 0 -> flag =0
-	    else if(recv_value==0){flag=0;}
+	    else if(recv_value==0){flag=0;send_flag=0;}
             
             receiveBuffer[readBytes] = '\0';
             sleep(1);
