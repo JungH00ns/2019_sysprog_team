@@ -17,6 +17,11 @@
 #define BUTTON_MAJOR_NUMBER 506
 #define BUTTON_MINOR_NUMBER 100
 #define BUTTON_DEV_PATH 	"/button/simple_button_dev"
+// led define section
+#define LED_MAJOR_NUMBER	507
+#define LED_MINOR_NUMBER 100
+#define LED_DEV_PATH_NAME "/led/led_dev"
+
 #define IOCTL_MAGIC_NUMBER 		 'b'
 #define IOCTL_CMD_SET_LED_ON     _IO(IOCTL_MAGIC_NUMBER, 0)
 #define IOCTL_CMD_SET_LED_OFF    _IO(IOCTL_MAGIC_NUMBER, 1)
@@ -36,8 +41,25 @@ void *myFunc(void *arg);
 // button variable
 dev_t button_dev;
 int button_fd; 
+// led variable
+dev_t led_dev;
+int led_fd;
+
 int status = SITUATION_OFF; 
 int current_button_value = 0, prev_button_value=0; 
+int client_state=0;
+
+int led_init(){
+    
+	led_dev=makedev(LED_MAJOR_NUMBER, LED_MINOR_NUMBER);
+	mknod(LED_DEV_PATH_NAME, S_IFCHR|0666, led_dev);
+	led_fd=open(LED_DEV_PATH_NAME, O_RDWR);
+	if(led_fd < 0){
+		printf("fail to open led\n");
+		return -1;
+	}
+    return 0;
+}
 
 int button_init(){
     button_dev=makedev(BUTTON_MAJOR_NUMBER, BUTTON_MINOR_NUMBER);
@@ -125,7 +147,7 @@ void *myFunc(void *arg)
     char sendBuff[BUFFER_SIZE];
 	int connectFD;
 	int receivedBytes;
-    int client_state=0;
+    
     char arr[1024]={0,};    //
 	connectFD = *((int *)arg);
     
@@ -133,7 +155,6 @@ void *myFunc(void *arg)
                 
     while((receivedBytes = read(connectFD, readBuff, BUFF_SIZE)) > 0)
     {                
-        //printf("%lu bytes read\n", receivedBytes);
         readBuff[receivedBytes] = '\0';
         fputs(readBuff, stdout);
                     fflush(stdout);
@@ -145,7 +166,6 @@ void *myFunc(void *arg)
                         printf("read0\n");
                         if(client_state!=0){
                             sprintf(arr, "%d\n", client_state);
-                            //sprintf()
                             write(connectFD,arr,1);
                         }
                         else if(client_state==0){
