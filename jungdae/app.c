@@ -112,18 +112,30 @@ int main(int argc, char** argv)
         char sendBuffer[BUFFER_SIZE];
         char receiveBuffer[BUFFER_SIZE];
         int flag=0;
+        int send_flag=0;
         while (1) 
         {
-            int send_flag=0;
+            
             int ultra_status=ultra_check();
             int flame_status=flame_check();
+<<<<<<< HEAD
            // printf("    %d\n",flame_status);
             if(seud_flag!=1&& send_flag!=2){
+=======
+            printf("    %d\n",flame_status);
+            if(send_flag != 1 && send_flag!=2)
+            {
+>>>>>>> 48e0808f1937132fcabe2aef42abac330d44995c
                 if(flame_status==3)
                     send_flag=3;
                 else if(ultra_status==4)
                     send_flag=4;
             }
+<<<<<<< HEAD
+=======
+            
+            
+>>>>>>> 48e0808f1937132fcabe2aef42abac330d44995c
                 
             sprintf(sendBuffer,"%d\n", send_flag);
             write(connectFD, sendBuffer, strlen(sendBuffer));
@@ -131,14 +143,21 @@ int main(int argc, char** argv)
             readBytes = read(connectFD, receiveBuffer, BUFF_SIZE);
            
             int recv_value=atoi(receiveBuffer);
+<<<<<<< HEAD
+=======
+            printf("send : %d recv : %d \n",send_flag,recv_value);
+>>>>>>> 48e0808f1937132fcabe2aef42abac330d44995c
             if(recv_value==1){
                 send_flag=1;
             }
             if(recv_value==2){
                 send_flag=2;
             }
+<<<<<<< HEAD
             
            // printf("send : %d recv : %d \n",send_flag,recv_value);
+=======
+>>>>>>> 48e0808f1937132fcabe2aef42abac330d44995c
             
             if(recv_value!=0){
                 flag++;
@@ -152,7 +171,7 @@ int main(int argc, char** argv)
                 }
                 buzzer_check(recv_value);
             }//recv 0 -> flag =0
-            else if(recv_value==0){
+             else if(recv_value==0){
                 flag=0;
                 send_flag=0;
             }
