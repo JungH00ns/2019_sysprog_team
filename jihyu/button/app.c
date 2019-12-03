@@ -15,7 +15,6 @@
 
 #define SIMPLE_BUTTON_MAJOR_NUMBER 506
 #define SIMPLE_BUTTON_MINOR_NUMBER 100
-#define LED_DEV_PATH 		"/led_dev"
 #define SIMPLE_BUTTON_DEV_PATH 	"/simple_button_dev"
 
 #define INTERVAL 		50000

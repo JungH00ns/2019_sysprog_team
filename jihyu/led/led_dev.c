@@ -23,7 +23,11 @@
 #define GPFSEL2 0x08
 //gpio 5 - B
 #define GPFSEL0 0x00
-
+#define BLACK 0
+#define RED 1
+#define GREEN 2
+#define BLUE 3
+#define BG 4	//BLUE_GREEN
 
 #define LED_MAGIC_NUMBER  'l'
 #define LED_CMD_SEND     _IOW(LED_MAGIC_NUMBER, 0,int)
@@ -60,47 +64,61 @@ int led_release(struct inode * inode, struct file * filp) {
 
 long led_ioctl(struct file * filp, unsigned int cmd, unsigned long arg)
 { 
-    int color=0;
+    int color=0;		//red
     *gpsel1&=(0<<20);
     *gpsel1|=(1<<18);
     
-    *gpsel0&=(0<<20);
+    *gpsel0&=(0<<20);		//GREEN
     *gpsel0|=(1<<15);
     
-    *gpsel2&=(0<<3);
+    *gpsel2&=(0<<3);		//BLUE
     *gpsel2|=(1);
     
     switch (cmd){ 
 	case LED_CMD_SEND: 
 	    copy_from_user(&color,(const void*)arg,4);
-
-	    if(color==1){	//red
+		switch(color){
+		case RED: 
+	    
+			*gpset0|=(1<<20);
+			*gpset0|=(1<<16);
+			*gpset0|=(1<<5);
+			*gpsel0&=(0<<20);
+			*gpsel2&=(0<<3);
+			break;
+		case GREEN:
+			*gpset0|=(1<<20);
+			*gpset0|=(1<<16);
+			*gpset0|=(1<<5);
+			*gpsel0&=(0<<20);
+			*gpsel1&=(0<<20);
+			break;
+		case BLUE:
+			*gpset0|=(1<<20);
+			*gpset0|=(1<<16);
+			*gpset0|=(1<<5);
+			*gpsel1&=(0<<20);
+			*gpsel2&=(0<<3);
+			break;
+		case BG:
+		/*
+			*gpset0|=(1<<20);
+			*gpset0|=(1<<16);
+			*gpset0|=(1<<5);
+			*gpsel0&=(0<<20);
+			*/
 		*gpset0|=(1<<20);
 		*gpset0|=(1<<16);
 		*gpset0|=(1<<5);
-		*gpsel0&=(0<<20);
-		*gpsel2&=(0<<3);
-	    }
-	    else if(color==2){	//green
-		*gpset0|=(1<<20);
-		*gpset0|=(1<<16);
-		*gpset0|=(1<<5);
-		*gpsel0&=(0<<20);
 		*gpsel1&=(0<<20);
-	    }
-	    else if(color==3){		//blue
-		*gpset0|=(1<<20);
-		*gpset0|=(1<<16);
-		*gpset0|=(1<<5);
-		*gpsel1&=(0<<20);
-		*gpsel2&=(0<<3);
-	    }
-	    else if(color == 4 ){ //red green
-		*gpset0|=(1<<20);
-		*gpset0|=(1<<16);
-		*gpset0|=(1<<5);
-		*gpsel0&=(0<<20);
-	    }
+			break;	
+		case BLACK:
+			*gpsel0&=(0<<20);
+			*gpsel1&=(0<<20);
+			*gpsel2&=(0<<3);
+			break;
+			
+		/*
 	    else if(color == 5 ){ //red blue
 		*gpset0|=(1<<20);
 		*gpset0|=(1<<16);
@@ -118,11 +136,12 @@ long led_ioctl(struct file * filp, unsigned int cmd, unsigned long arg)
 		*gpset0|=(1<<16);
 		*gpset0|=(1<<5);
 	    }
-	    break; 
+		*/ 
 	    
-	    
-	default : 
-	    printk(KERN_ALERT "ioctl : command error\n");
+		default : 
+			printk(KERN_ALERT "ioctl : command error\n");
+			break;
+		}
     }
     
     return 0; 
