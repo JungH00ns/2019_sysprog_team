@@ -119,7 +119,7 @@ int main(int argc, char** argv)
             int ultra_status=ultra_check();
             int vib_status=vib_check();
             
-	    if(send_flag != 4 && send_flag!=3)
+	    if(send_flag ==0)
 	    {
 		if(ultra_status==1)
 		    send_flag=1;
@@ -133,8 +133,7 @@ int main(int argc, char** argv)
             readBytes = read(connectFD, receiveBuffer, BUFF_SIZE);
            
             int recv_value=atoi(receiveBuffer);
-	    if(recv_value == 4 ){send_flag=4;}
-	    else if(recv_value == 3 ){send_flag=3;}
+	    if(recv_value > 0){send_flag =recv_value;}
             printf(" recv : %d send : %d\n",recv_value,send_flag);
 
             if(recv_value!=0){
