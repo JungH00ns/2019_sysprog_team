@@ -117,11 +117,13 @@ int main(int argc, char** argv)
             int send_flag=0;
             int ultra_status=ultra_check();
             int flame_status=flame_check();
-            printf("    %d\n",flame_status);
-            if(flame_status==3)
-                send_flag=3;
-            else if(ultra_status==4)
-                send_flag=4;
+           // printf("    %d\n",flame_status);
+            if(seud_flag!=1&& send_flag!=2){
+                if(flame_status==3)
+                    send_flag=3;
+                else if(ultra_status==4)
+                    send_flag=4;
+            }
                 
             sprintf(sendBuffer,"%d\n", send_flag);
             write(connectFD, sendBuffer, strlen(sendBuffer));
@@ -129,7 +131,14 @@ int main(int argc, char** argv)
             readBytes = read(connectFD, receiveBuffer, BUFF_SIZE);
            
             int recv_value=atoi(receiveBuffer);
-            printf("send : %d recv : %d \n",send_flag,recv_value);
+            if(recv_value==1){
+                send_flag=1;
+            }
+            if(recv_value==2){
+                send_flag=2;
+            }
+            
+           // printf("send : %d recv : %d \n",send_flag,recv_value);
             
             if(recv_value!=0){
                 flag++;
@@ -145,6 +154,7 @@ int main(int argc, char** argv)
             }//recv 0 -> flag =0
             else if(recv_value==0){
                 flag=0;
+                send_flag=0;
             }
                 
                 receiveBuffer[readBytes] = '\0';
