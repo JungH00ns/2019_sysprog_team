@@ -54,7 +54,8 @@ int SPIDataRW(int channel , unsigned char *data ,int len)
 	spi.len = len;
 	spi.delay_usecs = spiDelay;
 	spi.speed_hz = 1000000;
-	spi.bits_per_word = spiBPW;
+	spi.bits_per_word = spiBPW;    
+	//sleep(1000);
 	
 	return ioctl(spiFds[channel],SPI_IOC_MESSAGE(1),&spi);
 }
@@ -64,7 +65,7 @@ int read_mcp3008_adc(unsigned char adcChannel)
 	unsigned char buff[3];
 	int adcValue = 0;
 	int send_bit;
-	buff[0] = 0x06 | ((adcChannel & 0x07) >>2 );
+	buff[0] = 0x06 | ((adcChannel & 0x07) >> 7 );
 	buff[1] = ((adcChannel & 0x07) << 6 );
 	buff[2] = 0x00;
 	
@@ -73,7 +74,7 @@ int read_mcp3008_adc(unsigned char adcChannel)
 	
 	SPIDataRW(SPI_CHANNEL,buff,3);
 	
-	printf("buff 0 : %s\n buff 1 : %s\n buff 2 : %s\n",buff[1],buff[2],buff[3]);
+	printf("buff 1 : %s\n buff 2 : %s\n buff 3 : %s\n",buff[1],buff[2],buff[3]);
 	
 	buff[1] = 0x0F & buff[1];
 	adcValue = (( buff[1]<<8) | buff[2]);
@@ -88,7 +89,7 @@ int main(void)
 {
 	dev_t vib_dev;
 	char buf[1024];
-	int adcValue =0;
+	int adcValue =0;	
 	int adcChannel=0;
 	int spifd;
 	
