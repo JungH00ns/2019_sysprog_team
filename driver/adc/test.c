@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-
 #include <wiringPi.h>
 #include <wiringPiSPI.h>
 
