@@ -37,11 +37,6 @@
 #define FLAME_CMD_RECV    _IOWR(FLAME_MAGIC_NUMBER, 1,int)
 #define FLAME_CMD_CHECK    _IOWR(FLAME_MAGIC_NUMBER, 2,int)
 
-#define BIT_1 0x01
-#define BIT_2 0x01
-#define BIT_3 0x00
-
-
 static void __iomem * gpio_base;
 volatile unsigned int * gpfsel0; 
 volatile unsigned int * gpfsel1;
