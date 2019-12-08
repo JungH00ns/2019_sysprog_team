@@ -117,7 +117,7 @@ int main(int argc, char** argv)
             int ultra_status=ultra_check();
             int flame_status=flame_check();
             
-            printf("    %d\n",flame_status);
+           // printf("    %d\n",flame_status);
             if(send_flag != 1 && send_flag!=2)
             {
                 if(flame_status==3)
@@ -200,7 +200,7 @@ int ultra_check(){
         if(recv_bit!=0)
         {
             time=recv_bit*1.4;
-            printf("time bit : %3f\n",recv_bit*1.4);
+            //printf("time bit : %3f\n",recv_bit*1.4);
             break;
         }
         usleep(1);
@@ -224,11 +224,11 @@ int flame_init(){
 
 int flame_check(){
     int recv_bit;
-    ioctl(flame_fd,FLAME_CMD_RECV,&recv_bit);
+    ioctl(flame_fd,FLAME_CMD_SEND,&recv_bit);
     
-    if(recv_bit==1)
+    if(recv_bit>500)
         return 0;
-    else if(recv_bit==0)
+    else
         return 3;
 }
 
@@ -261,68 +261,4 @@ int buzzer_check(int num){
     int situation=num-1;
     ioctl(buzzer_fd,BUZZER_CMD_SET_DIRECTION,&situation);
 }
-int SPIDataRW (int channel, unsigned char *data, int len)
- {	 
-     struct spi_ioc_transfer spi ;
 
-     channel &= 1 ;
-     spi.tx_buf        = (unsigned long)data ;
-     spi.rx_buf        = (unsigned long)data ;
-     spi.len           = len ;
-     spi.delay_usecs   = spiDelay ;
-     spi.speed_hz      = 1000000;
-     spi.bits_per_word = spiBPW ;
-     return ioctl (spiFds [channel], SPI_IOC_MESSAGE(1), &spi) ;
- }
-
- int read_mcp3208_adc(unsigned char adcChannel)
-{
-  unsigned char buff[3];
-  int adcValue = 0;
-
-  buff[0] = 0x06 | ((adcChannel & 0x07) >> 7);
-  buff[1] = ((adcChannel & 0x07) << 6);
-  buff[2] = 0x00;
-
-  digitalWrite_pin_25(0);  // Low : CS Active
-
-  SPIDataRW(SPI_CHANNEL, buff, 3);
-
-  buff[1] = 0x0F & buff[1];
-  adcValue = ( buff[1] << 8) | buff[2];
-
-  digitalWrite_pin_25(1);  // High : CS Inactive
-
-  return adcValue;
-}
-
-
-
-
- void pin_25_Mode(int mode)
- {
-     int fSel, shift, alt ;
-
-       fSel    = 2;
-       shift   = 15;
-
-	 if (mode == INPUT){
-			*(gpio + fSel ) = (*(gpio + fSel) & ~(7 << shift)) ; // Sets bits to     zero = input
-     }
-	 else if (mode == OUTPUT){
-			*(gpio ) = (*(gpio ) & ~(7 << shift)) | (1 << 24) ;
-			printf("OUTPUT\n");
-	 }
- }
-
- void digitalWrite_pin_25(int value)
- {
-     int pin =8;
-     int gpCLR = 10;
-     int gpSET = 7;
-
-     if (value == LOW)
-         *(gpio + gpCLR) = 1 << (pin & 31) ;
-     else
-         *(gpio + gpSET) = 1 << (pin & 31) ;
-}

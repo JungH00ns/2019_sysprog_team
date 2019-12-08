@@ -16,6 +16,7 @@
 #define FLAME_BASE_ADDRESS	0x3F200000
 
 #define GPFSEL0 0x00
+#define GPFSEL1 0x04
 #define GPSET0	0x1C
 #define GPCLR0	0x28
 #define GPLEV0  0x34
@@ -57,7 +58,9 @@ int flame_open(struct inode * inode, struct file * filp){
     printk(KERN_ALERT "flame driver open\n"); 
 
     gpio_base = ioremap(FLAME_BASE_ADDRESS, 0x60); 
-    gpsel0 = (volatile unsigned int *)(gpio_base + GPFSEL0);
+    gpfsel0 = (volatile unsigned int *)(gpio_base + GPFSEL0);
+    gpfsel1 = (volatile unsigned int *)(gpio_base + GPFSEL1);
+
     gpset0 = (volatile unsigned int *)(gpio_base + GPSET0);
     gpclr0 = (volatile unsigned int *)(gpio_base + GPCLR0);
     gplev0 = (volatile unsigned int *)(gpio_base + GPLEV0);
@@ -69,7 +72,12 @@ int flame_open(struct inode * inode, struct file * filp){
     spi_dlen = (volatile unsigned int *)(spi_base + SPI_DLEN);
     spi_ltoh = (volatile unsigned int *)(spi_base + SPI_LTOH);
     spi_dc = (volatile unsigned int *)(spi_base + SPI_DC);
+    (*gpfsel0) &= (0x0 << 29);
+    (*gpfsel0) |= (0x1 << 29);
+    (*gpfsel0) |= (0x1 << 26);
     
+    (*gpfsel1) |= (0x1 << 5);
+    (*gpfsel1) |= (0x1 << 2);
     *spi_cs=0x00b0;
     *spi_clock&=(0<<31);
     *spi_clock|=(1<<7);
@@ -95,7 +103,7 @@ long flame_ioctl(struct file * filp, unsigned int cmd, unsigned long arg)
            txcnt=rxcnt=0;
             while(txcnt<3 || rxcnt<3){
                 while(((*spi_cs) & (1<<18))&&(txcnt<3)){
-                    (*spi_fifo)|=mosi[0][txcnt++];
+                    (*spi_fifo)|=mosi[txcnt++];
                     *spi_fifo=0;
                     break;
                     if(txcnt==3)
@@ -124,10 +132,11 @@ long flame_ioctl(struct file * filp, unsigned int cmd, unsigned long arg)
                 }
             }
             *spi_cs&=(0<<7);
-             printk(KERN_INFO "done %d %d\n", miso[0],miso[1]);
             
             kbuf+=miso[0]<<8;
             kbuf+=miso[1];
+            printk(KERN_INFO "done %d\n",kbuf);
+
             copy_to_user(arg,&kbuf,sizeof(int));
             break;
 
