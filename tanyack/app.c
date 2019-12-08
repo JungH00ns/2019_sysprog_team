@@ -123,7 +123,7 @@ int main(int argc, char** argv)
 	    {
 		if(ultra_status==1)
 		    send_flag=1;
-		else if(vib_status==1)
+		else if(vib_status>=1)
 		    send_flag=2; //2
 	    }
 	    
@@ -227,7 +227,7 @@ int vib_check(){
     ioctl(vib_fd,VIB_CMD_SEND,&recv_bit);
     printf("now = %d\n",recv_bit);
    // usleep(500000);
-    return recv_bit/4194304;
+    return recv_bit;
 }
 
 int motor_init(){
