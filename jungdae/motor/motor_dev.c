@@ -75,7 +75,13 @@ int motor_open(struct inode *inode, struct file *filp){
    pwmctl = (volatile unsigned int*)(pwm+PWM_CTL);
    pwmrng1 = (volatile unsigned int*)(pwm+PWM_RNG1);
    pwmdat1 = (volatile unsigned int*)(pwm+PWM_DAT1);
-
+   *gpsel1 &= ~(1<<26);   //Alternate function5
+   *gpsel1 |= (1<<25);
+   *gpsel1 &= ~(1<<24);
+   *pwmctl |= (1);      		//PWEN       1
+   *pwmctl &= ~(1<<1);    		//MODE1      0
+   *pwmctl |= (1<<7);    		//MSEN1      1
+   *pwmrng1 = 320;      		//RANGE      320
    return 0;
 }
 
@@ -86,32 +92,25 @@ int motor_release(struct inode *inode, struct file *filp){
    iounmap((void*)pwm);
    return 0;
 }
+
 long motor_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
    int kbuf = 0;
    int i = 0;
    init_pwm();
    switch(cmd) {
-      //Not only direction setting but PWM Setting. 
+	   
       case IOCTL_CMD_SET_DIRECTION:
-         //Original Code of motor_IOCTL
-         /////copy_from_user(&kbuf, (const void*)arg, 4);
-         *gpsel1 &= ~(1<<26);   //Alternate function5!!!
-         *gpsel1 |= (1<<25);
-         *gpsel1 &= ~(1<<24);
-         printk(KERN_ALERT "motor set direction out!!\n");
-         *pwmctl |= (1);      		//PWEN       1
-         *pwmctl &= ~(1<<1);    	//MODE1      0
-         *pwmctl |= (1<<7);    		//MSEN1      1
-         *pwmrng1 = 320;      		//RANGE      320
-         *pwmdat1|= (1<<5);   	 	//DAT     	 32   (1/10)
+         printk(KERN_ALERT "motor set\n");
+         *pwmdat1|= (1<<5);   	 	//DAT     	 32   (1/10) 90degrees
          printk(KERN_ALERT,"%x",*pwmdat1);
          break;
+		 
       case IOCTL_CMD_CLEAR_DIRECTION: 
-         printk(KERN_ALERT "motor clear direction out!!\n");
+         printk(KERN_ALERT "motor clear\n");
          *pwmdat1&= ~(1<<5);
          *pwmdat1|= (1<<4);   	 	
-         *pwmdat1|= (1<<3);         //DAT     	 24   (1.5/20)
+         *pwmdat1|= (1<<3);         //DAT     	 24   (1.5/20) 0degrees
          printk(KERN_ALERT,"%x",*pwmdat1);
          break;
    }
@@ -144,6 +143,6 @@ module_init(motor_init);
 module_exit(motor_exit);
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("wooseok");
-MODULE_DESCRIPTION("des");
+MODULE_AUTHOR("TEAM5");
+MODULE_DESCRIPTION("TEAM_PROJECT");
 

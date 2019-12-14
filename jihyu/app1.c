@@ -73,20 +73,15 @@ int button_set(int selc) {
 			return 1;
 		}
 			
-		
-		printf("????\n");
 		return 1;
 	}
 	else if (selc == 1) {	//on_off
 		ioctl(button_fd, IOCTL_CMD_ON_OFF, &mode);
-		//printf("mode : %d\n", mode);
 		
 		usleep(INTERVAL);
 		if(mode==0){
-			//printf("on_off mode==0\n");
 			return 0;
 		}else{
-			//printf("on_off mode==1...\n");
 			return 9;
 		}
 		
@@ -166,7 +161,7 @@ int main() {
 	}
 	while (1)
 	{
-		struct sockaddr_in connectSocket, peerSocket;
+		struct sockaddr_in connectSocket;
 
 		socklen_t connectSocketLength = sizeof(connectSocket);
 
@@ -198,7 +193,6 @@ void *myFunc(void *arg)
 	while ((receivedBytes = read(connectFD, readBuff, BUFF_SIZE)) > 0)
 	{
 		readBuff[receivedBytes] = '\0';
-		//fputs(readBuff, stdout);
 		printf("readBuff : %s",readBuff);
 		fflush(stdout);
 		
