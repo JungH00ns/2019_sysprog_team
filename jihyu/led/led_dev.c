@@ -1,4 +1,3 @@
-
 #include <linux/init.h> 
 #include <linux/kernel.h> 
 #include <linux/module.h> 
@@ -80,7 +79,6 @@ long led_ioctl(struct file * filp, unsigned int cmd, unsigned long arg)
        copy_from_user(&color,(const void*)arg,4);
       switch(color){
       case RED: 
-       
          *gpset0|=(1<<20);
          *gpset0|=(1<<16);
          *gpset0|=(1<<5);
@@ -102,42 +100,16 @@ long led_ioctl(struct file * filp, unsigned int cmd, unsigned long arg)
          *gpsel2&=(0<<3);
          break;
       case BG:
-      /*
-         *gpset0|=(1<<20);
-         *gpset0|=(1<<16);
-         *gpset0|=(1<<5);
-         *gpsel0&=(0<<20);
-         */
-      *gpset0|=(1<<20);
-      *gpset0|=(1<<16);
-      *gpset0|=(1<<5);
-      *gpsel1&=(0<<20);
+	 *gpset0|=(1<<20);
+	 *gpset0|=(1<<16);
+	 *gpset0|=(1<<5);
+	 *gpsel1&=(0<<20);
          break;   
       case BLACK:
          *gpsel0&=(0<<20);
          *gpsel1&=(0<<20);
          *gpsel2&=(0<<3);
          break;
-         
-      /*
-       else if(color == 5 ){ //red blue
-      *gpset0|=(1<<20);
-      *gpset0|=(1<<16);
-      *gpset0|=(1<<5);
-      *gpsel2&=(0<<3);
-       }
-       else if(color == 6 ){ //green blue
-      *gpset0|=(1<<20);
-      *gpset0|=(1<<16);
-      *gpset0|=(1<<5);
-      *gpsel1&=(0<<20);
-       }
-       else if(color == 7 ){ //red green blue
-      *gpset0|=(1<<20);
-      *gpset0|=(1<<16);
-      *gpset0|=(1<<5);
-       }
-      */ 
        
       default : 
          printk(KERN_ALERT "ioctl : command error\n");

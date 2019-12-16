@@ -55,17 +55,18 @@ long buzzer_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
       
       case IOCTL_CMD_SET_DIRECTION:
          printk(KERN_ALERT "buzzer set direction out!!\n");
-         if(situation==0){
-            for(a=0;a<5;a++){    //num
-               for(i=0;i<1000;i++){    //length
-                  *gpset0 |= (0x01 << 25); 
-                  udelay(100);         //if it is big low tone
-                  *gpclr0 |= (0x01 << 25); 
-                  udelay(500);         //if it is big high tone
+         
+         if(situation==0){                   //tanyack susang! - ultra
+            for(a=0;a<5;a++){                //sound 5 times
+               for(i=0;i<1000;i++){          //sound length
+                  *gpset0 |= (0x01 << 25);   //gpio25 set
+                  udelay(100);               
+                  *gpclr0 |= (0x01 << 25);   //gpio25 clear
+                  udelay(500);               
                }
-               mdelay(10);       //change   
+               mdelay(10);         
             }
-         }else if(situation==1){
+         }else if(situation==1){             //tanyack susang! - vibe
             for(a=0;a<5;a++){
                for(i=0;i<200;i++){
                   *gpset0 |= (0x01 << 25); 
@@ -75,7 +76,7 @@ long buzzer_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
                }
                mdelay(10);
             }
-         }else if(situation==2){
+         }else if(situation==2){             //jungdae susang! - fire
             for(a=0;a<6;a++){
                for(i=0;i<200;i++){
                   *gpset0 |= (0x01 << 25); 
@@ -85,7 +86,7 @@ long buzzer_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
                }
                mdelay(10);
             }
-         }else if(situation==3){
+         }else if(situation==3){             //jungdae susang! - ultra
             for(a=0;a<7;a++){
                for(i=0;i<200;i++){
                   *gpset0 |= (0x01 << 25); 
@@ -95,7 +96,7 @@ long buzzer_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
                }
                mdelay(10);
             }
-         }
+          }
          
          break;
    }

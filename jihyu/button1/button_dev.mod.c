@@ -29,8 +29,7 @@ __attribute__((section("__versions"))) = {
 	{ 0x6bc3fbc0, "__unregister_chrdev" },
 	{ 0xe549e5f5, "__register_chrdev" },
 	{ 0xdb7305a1, "__stack_chk_fail" },
-	{ 0x5f754e5a, "memset" },
-	{ 0x28cc25db, "arm_copy_from_user" },
+	{ 0xf4fa543b, "arm_copy_to_user" },
 	{ 0x8f678b07, "__stack_chk_guard" },
 	{ 0xedc03953, "iounmap" },
 	{ 0x2e5810c6, "__aeabi_unwind_cpp_pr1" },
@@ -45,4 +44,4 @@ __attribute__((section(".modinfo"))) =
 "depends=";
 
 
-MODULE_INFO(srcversion, "D4FF4A66B0CFFF56CABE689");
+MODULE_INFO(srcversion, "679C07BC719FB1FCA767D20");

@@ -184,6 +184,105 @@ int main() {
 }
 void *myFunc(void *arg)
 {
+<<<<<<< HEAD
+	char readBuff[BUFFER_SIZE];
+    char sendBuff[BUFFER_SIZE];
+	int connectFD;
+	int receivedBytes;
+    
+    char arr[1024]={0,};    //
+	connectFD = *((int *)arg);
+    
+ 	printf("enter client :  %d\n",connectFD);
+                
+    while((receivedBytes = read(connectFD, readBuff, BUFF_SIZE)) > 0)
+    {                
+        readBuff[receivedBytes] = '\0';
+        fputs(readBuff, stdout);
+                    fflush(stdout);
+                    int button_state=0; //
+                      printf("client : %d\n", client_state);
+
+                    if(!strncmp(readBuff,"0",1)){
+                        //alert event not occuerd
+                        printf("read0\n");
+                        if(client_state!=0){
+                            sprintf(arr, "%d\n", client_state);
+                            write(connectFD,arr,1);
+                        }
+                        else if(client_state==0){
+
+                            write(connectFD,"0",1);
+                        }
+                    }
+                    else if(!strncmp(readBuff,"1",1)){
+
+
+                        //tanyack susang! - ultra
+                        if(client_state==0){ //
+
+                            //if(button_state==1){ //button_status-> button_state
+                           //     write(connectFD,"0",1);
+                           // }
+                           // else if(button_state==0){
+                                write(connectFD,"1",1);
+                                client_state=1;
+                           // }
+                        }
+                        else if(client_state!=0){ //
+            sprintf(arr, "%d\n", client_state);
+                            //sprintf()
+                            write(connectFD,arr,1);
+                           /* if(button_state==1){
+                                write(connectFD,"0",1);
+                                client_state=0;
+                            }
+                            else if(button_state==0){
+                                write(connectFD,"1",1);
+                                client_state=1;
+                            }*/
+                          //  write(connectFD,"1",1);
+                        }
+                    }
+                    else if(!strncmp(readBuff,"2",1)){
+                         if(client_state==0){ //
+                            if(button_state==1){ //button_status-> button_state
+                                write(connectFD,"0",1);
+                            }
+                            else if(button_state==0){
+                                write(connectFD,"2",1);
+                                client_state=2;
+                            }
+                        }
+                        else if(client_state!=0){ //
+                            if(button_state==1){
+                                write(connectFD,"0",1);
+                                client_state=0;
+                            }
+                            else if(button_state==0){
+                                write(connectFD,"2",1);
+                                client_state=2;
+                            }
+                          //  write(connectFD,"1",1);
+                        }
+                    }
+                    else if(!strncmp(readBuff,"3",1)){
+                        //jungdae susang! - fire
+                        write(connectFD,"3",1);
+                        client_state=3;
+                    }
+                    else if(!strncmp(readBuff,"4",1)){
+                        //jungdae susang! - ultra
+                        write(connectFD,"4",1);
+                        client_state=4;
+                    }
+                    else if(!strncmp(readBuff,"5",1)){
+                        //temp temp
+                        write(connectFD,"5",1);
+                        client_state=5;
+                    }
+                }
+=======
    char readBuff[BUFF_SIZE];
    char sendBuff[BUFF_SIZE];
    int connectFD;
@@ -285,4 +384,5 @@ void *myFunc(void *arg)
          write(connectFD, "5", 1);
       }
    }
+>>>>>>> 424c2043681dc357ae02060759154a0f0272de23
 }
